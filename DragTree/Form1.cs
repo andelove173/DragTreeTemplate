@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -13,48 +14,116 @@ namespace DragTree
 {
     public partial class Form1 : Form
     {
-        // TODO - create an int variable to track currentRow,
-        // TODO - create a Stopwatch object called stopwatch 
-
-        // TODO - create a timer on the form called lightTimer (interval 400ms)
-        // TODO - create the tick event for the lightTimer
-
-        // place the following comments in the lighTimer tick event
-        // TODO - create a switch block that checks currentRow. In each case
-        // it will light up the appropriate lights, (labels). 
-
-        // TODO - increment the currentRow value by 1
+        //global variables
+        int currentRow;
+        Stopwatch stopwatch = new Stopwatch();
+        double timer;
 
         public Form1()
         {
             InitializeComponent();
+
+            timerLights.Interval = 400;
+            timerLights.Tick += timerLights_Tick;
+
+            reactionTimer.Interval = 1;
+            reactionTimer.Tick += elapsedTime_Tick;
+        }
+
+        private void timerLights_Tick(object sender, EventArgs e)
+        {
+            currentRow++;
+            if (currentRow == 1)
+            {
+                row1col1.BackColor = Color.Orange;
+                row1col2.BackColor = Color.Orange;
+            }
+            if (currentRow == 2)
+            {
+                row2col1.BackColor = Color.Orange;
+                row2col2.BackColor = Color.Orange;
+            }
+            if (currentRow == 3)
+            {
+                row3col1.BackColor = Color.Orange;
+                row3col2.BackColor = Color.Orange;
+            }
+            if (currentRow == 4)
+            {
+                row4col1.BackColor = Color.Green;
+                row4col2.BackColor = Color.Green;
+                timerLights.Enabled = false;
+                stopwatch.Restart();
+                reactionTimer.Enabled = true;
+            }
+            
+        }
+
+        private void elapsedTime_Tick(object sender, EventArgs e)
+        {
+            timer = stopwatch.Elapsed.TotalSeconds;
+            timeLabel.Text = timer.ToString("F3");
         }
 
         private void startButton_Click(object sender, EventArgs e)
         {
-            // TODO - start the timer
+            resetLights();
+            timerLights.Enabled = true;
+            currentRow = 0;
+            timer = 0;
+            timeLabel.Text = "0.000";
 
-        }
+            stopwatch.Reset();
+            reactionTimer.Enabled = false;
 
-        private void goButton_Click(object sender, EventArgs e)
-        {
-            // TODO - stop the stopwatch
-
-            // TODO - check if the ellapsed time in milliseconds is > 0. 
-            // If yes show the time.
-            // If no show "FOUL START" 
-
+            
         }
 
         private void resetButton_Click(object sender, EventArgs e)
         {
-            // TODO - reset the stopwatch
+            stopwatch.Reset();
+            reactionTimer.Enabled = false;
+            timerLights.Enabled = false;
 
-            // TODO - put rows 1-3 colours back to DimGray and row 4 back to DarkOliveGreen
+            resetLights();
 
-            // TODO - reset row value and timeLabel text
+            timer = 0;
+            timeLabel.Text = "0.000";
 
+            currentRow = 0;
         }
 
+        private void resetLights()
+        {
+            row4col1.BackColor = Color.DarkOliveGreen;
+            row4col2.BackColor = Color.DarkOliveGreen;
+            Thread.Sleep(1000);
+
+            row3col1.BackColor = Color.DimGray;
+            row3col2.BackColor = Color.DimGray;
+            Thread.Sleep(1000);
+
+            row2col1.BackColor = Color.DimGray;
+            row2col2.BackColor = Color.DimGray;
+            Thread.Sleep(1000);
+
+            row1col1.BackColor = Color.DimGray;
+            row1col2.BackColor = Color.DimGray;
+        }
+
+        private void goButton_Click(object sender, EventArgs e)
+        {
+            stopwatch.Stop();
+            reactionTimer.Enabled = false;
+
+            if (stopwatch.ElapsedMilliseconds >= 0.000)
+            {
+                timeLabel.Text = stopwatch.Elapsed.TotalSeconds.ToString("F3");
+            }
+            else
+            {
+                timeLabel.Text = "FOUL START";
+            }
+        }
     }
 }
